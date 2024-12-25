@@ -64,7 +64,7 @@ npm run start
 ```
 ### Scheduled Run
 
-To set up the bot to run every day at 08.30 AM UTC, follow these steps:
+Rastgele bir saat ve dakika oluşturma (08:00 ile 11:59 arasında çalışacak):
 
 1.	Make the setup-cron.sh script executable:
  ```sh
