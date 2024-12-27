@@ -86,6 +86,9 @@ chmod +x setup-cron.sh
 ```sh
 ./setup-cron.sh
 ```
+```sh
+cat cron.log
+```
 
 ## CONTRIBUTE
 
