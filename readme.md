@@ -10,6 +10,9 @@ Bu Taiko da günlük olarak hacim botudur, rutin bir bottur, görevi 50 tane wra
 1. **Update the package lists:**
 
     ```sh
+    screen -S Taiko
+    ```
+    ```sh
     sudo apt-get update
     ```
 
