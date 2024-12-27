@@ -34,10 +34,10 @@ Bu Taiko da günlük olarak hacim botudur, rutin bir bottur, görevi 50 tane wra
 5. **Install Node.js (if not already installed):**
 
     ```sh
-    sudo apt-get install nodejs
+    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
     ```
     ```sh    
-    sudo apt-get install npm
+   sudo apt-get install -y nodejs
     ```
 
 6. **Install the project dependencies:**
