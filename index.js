@@ -1,3 +1,109 @@
+require('dotenv').config();
+const { getWeb3, walletAddress, switchRpc } = require('./config/web3');
+const { wrap } = require('./src/module/wrap/wrap');
+const { unwrap } = require('./src/module/wrap/unwrap');
+const BN = require('bn.js');
+const Web3 = require('web3');
+
+// Random gas price calculation function
+function randomGasPrice(web3Instance) {
+    const minGwei = new BN(web3Instance.utils.toWei('0.11', 'gwei'));
+    const maxGwei = new BN(web3Instance.utils.toWei('0.15', 'gwei'));
+    const randomGwei = minGwei.add(new BN(Math.floor(Math.random() * (maxGwei.sub(minGwei).toNumber()))));
+    return randomGwei;
+}
+
+// Function to get nonce
+async function getNonce(web3Instance) {
+    return await web3Instance.eth.getTransactionCount(walletAddress, 'pending');
+}
+
+// Transaction execution function
+async function executeTransaction(action, gasPriceWei, localNonce, ...args) {
+    let web3Instance = getWeb3();
+    while (true) {
+        try {
+            const gasLimit = new BN(100000);
+            const totalTxCost = gasLimit.mul(new BN(gasPriceWei));
+            const balanceWei = await web3Instance.eth.getBalance(walletAddress);
+            const balance = new BN(balanceWei);
+
+            if (balance.lt(totalTxCost)) {
+                console.log("Insufficient funds to cover the transaction cost. Transaction skipped.");
+                return;
+            }
+
+            return await action(...args, gasPriceWei.toString(), localNonce);
+        } catch (error) {
+            console.error(`Error executing transaction: ${error.message}`);
+            if (error.message.includes("Invalid JSON RPC response")) {
+                console.log("Retrying...");
+                web3Instance = switchRpc(); 
+            } else if (error.message.includes("nonce too low")) {
+                console.log("Nonce too low, retrying with new nonce...");
+                localNonce = await getNonce(web3Instance);
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 5000)); 
+            }
+        }
+    }
+}
+
+// Function to get WETH balance
+async function getWethBalance(web3Instance, wethContractAddress, walletAddress) {
+    const wethChecksumAddress = Web3.utils.toChecksumAddress(wethContractAddress);
+    const wethContract = new web3Instance.eth.Contract([
+        {
+            "constant": true,
+            "inputs": [{ "name": "_owner", "type": "address" }],
+            "name": "balanceOf",
+            "outputs": [{ "name": "balance", "type": "uint256" }],
+            "type": "function"
+        }
+    ], wethChecksumAddress);
+
+    const balance = await wethContract.methods.balanceOf(walletAddress).call();
+    return new BN(balance);
+}
+
+// Function to confirm transaction
+async function confirmTransaction(web3Instance, txHash) {
+    const receipt = await web3Instance.eth.getTransactionReceipt(txHash);
+    return receipt && receipt.status;
+}
+
+// Function to periodically check WETH balance
+async function waitForWethBalance(web3Instance, wethContractAddress, walletAddress, timeout = 60000, interval = 5000) {
+    const start = Date.now();
+    while (Date.now() - start < timeout) {
+        const wethBalance = await getWethBalance(web3Instance, wethContractAddress, walletAddress);
+        if (!wethBalance.isZero()) {
+            return wethBalance;
+        }
+        await new Promise(resolve => setTimeout(resolve, interval));
+    }
+    throw new Error("WETH balance did not appear within the timeout period.");
+}
+
+// Function to periodically check ETH balance
+async function waitForEthBalance(web3Instance, walletAddress, requiredBalance, timeout = 60000, interval = 5000) {
+    const start = Date.now();
+    while (Date.now() - start < timeout) {
+        const balanceWei = await web3Instance.eth.getBalance(walletAddress);
+        const balance = new BN(balanceWei);
+        if (balance.gte(requiredBalance)) {
+            return balance;
+        }
+        await new Promise(resolve => setTimeout(resolve, interval));
+    }
+    throw new Error("Required ETH balance did not appear within the timeout period.");
+}
+
+// Create a random wait time (between 0 and max ms)
+function getRandomWaitTime(maxMilliseconds) {
+    return Math.floor(Math.random() * maxMilliseconds);
+}
+
 async function main() {
     let web3Instance = getWeb3();
     const maxIterations = 50;  // Just run for 50 iterations without time limit
