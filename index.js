@@ -5,7 +5,7 @@ const { unwrap } = require('./src/module/wrap/unwrap');
 const BN = require('bn.js');
 const Web3 = require('web3');
 
-// Rastgele gaz fiyatı hesaplama fonksiyonu
+// Random gas price calculation function
 function randomGasPrice(web3Instance) {
     const minGwei = new BN(web3Instance.utils.toWei('0.11', 'gwei'));
     const maxGwei = new BN(web3Instance.utils.toWei('0.15', 'gwei'));
@@ -13,12 +13,12 @@ function randomGasPrice(web3Instance) {
     return randomGwei;
 }
 
-// Nonce alma fonksiyonu
+// Function to get nonce
 async function getNonce(web3Instance) {
     return await web3Instance.eth.getTransactionCount(walletAddress, 'pending');
 }
 
-// İşlem yürütme fonksiyonu
+// Transaction execution function
 async function executeTransaction(action, gasPriceWei, localNonce, ...args) {
     let web3Instance = getWeb3();
     while (true) {
@@ -49,7 +49,7 @@ async function executeTransaction(action, gasPriceWei, localNonce, ...args) {
     }
 }
 
-// WETH bakiyesini alma fonksiyonu
+// Function to get WETH balance
 async function getWethBalance(web3Instance, wethContractAddress, walletAddress) {
     const wethChecksumAddress = Web3.utils.toChecksumAddress(wethContractAddress);
     const wethContract = new web3Instance.eth.Contract([
@@ -66,13 +66,13 @@ async function getWethBalance(web3Instance, wethContractAddress, walletAddress) 
     return new BN(balance);
 }
 
-// İşlemin gerçekleşip gerçekleşmediğini teyit eden fonksiyon
+// Function to confirm transaction
 async function confirmTransaction(web3Instance, txHash) {
     const receipt = await web3Instance.eth.getTransactionReceipt(txHash);
     return receipt && receipt.status;
 }
 
-// WETH bakiyesini periyodik olarak kontrol eden fonksiyon
+// Function to periodically check WETH balance
 async function waitForWethBalance(web3Instance, wethContractAddress, walletAddress, timeout = 60000, interval = 5000) {
     const start = Date.now();
     while (Date.now() - start < timeout) {
@@ -85,7 +85,7 @@ async function waitForWethBalance(web3Instance, wethContractAddress, walletAddre
     throw new Error("WETH balance did not appear within the timeout period.");
 }
 
-// ETH bakiyesini periyodik olarak kontrol eden fonksiyon
+// Function to periodically check ETH balance
 async function waitForEthBalance(web3Instance, walletAddress, requiredBalance, timeout = 60000, interval = 5000) {
     const start = Date.now();
     while (Date.now() - start < timeout) {
@@ -99,25 +99,23 @@ async function waitForEthBalance(web3Instance, walletAddress, requiredBalance, t
     throw new Error("Required ETH balance did not appear within the timeout period.");
 }
 
-// Rastgele bir bekleme süresi oluşturma (0 ile max ms arasında)
+// Create a random wait time (between 0 and max ms)
 function getRandomWaitTime(maxMilliseconds) {
     return Math.floor(Math.random() * maxMilliseconds);
 }
 
 async function main() {
     let web3Instance = getWeb3();
-    const maxIterations = 50;
-    const totalDurationMilliseconds = 5 * 60 * 60 * 1000; // 5 saat toplam süre
-    const maxWaitTimePerIteration = totalDurationMilliseconds / maxIterations;
+    const maxIterations = 50;  // Just run for 50 iterations without time limit
     let completedIterations = 0;
     let completedSwaps = 0;
-    const wethContractAddress = '0xA51894664A773981C6C112C43ce576f315d5b1B6'; // Taiko ağı için doğru WETH contract adresi
+    const wethContractAddress = '0xA51894664A773981C6C112C43ce576f315d5b1B6'; // Correct WETH contract address for Taiko network
 
     while (completedIterations < maxIterations) {
-        const waitTime = getRandomWaitTime(maxWaitTimePerIteration);
+        const waitTime = getRandomWaitTime(30000); // Random wait up to 30 seconds for each iteration
         console.log(`Waiting for ${waitTime / 1000} seconds before next iteration.`);
         
-        // Belirlenen zamana kadar bekleyin
+        // Wait for the specified time
         await new Promise(resolve => setTimeout(resolve, waitTime));
         
         const gasPriceWei = randomGasPrice(web3Instance);
@@ -137,7 +135,7 @@ async function main() {
         }
 
         // ETH to WETH (Wrap)
-        const amountToWrap = balance.muln(90).divn(100); // %90 of the balance
+        const amountToWrap = balance.muln(90).divn(100); // 90% of the balance
         await waitForEthBalance(web3Instance, walletAddress, amountToWrap.add(totalTxCost)); // Check if the required ETH balance is available
 
         localNonce = await getNonce(web3Instance);
