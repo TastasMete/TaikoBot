@@ -20,4 +20,4 @@ fi
 CRON_JOB="20 06 * * * cd $PROJECT_PATH && . /etc/profile && . ~/.bashrc && env $(cat .env) $NODE_PATH $PROJECT_PATH/index.js >> $PROJECT_PATH/cron.log 2>&1"
 (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
 
-echo "Cron job added successfully. The bot will run every day at 12:45 PM UTC."
+echo "Cron job added successfully. The bot will run every day at 06:20 PM UTC."
