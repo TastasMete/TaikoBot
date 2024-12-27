@@ -68,6 +68,18 @@ Rastgele bir saat ve dakika oluşturma (08:00 ile 11:59 arasında çalışacak):
 
 1.	Make the setup-cron.sh script executable:
  ```sh
+sudo apt-get update
+```
+```sh
+sudo apt-get install cron
+```
+```sh
+sudo service cron start
+```
+```sh
+sudo systemctl enable cron
+```
+```sh
 chmod +x setup-cron.sh
 ```
 2.	Run the setup-cron.sh script:
