@@ -10,31 +10,42 @@ Bu Taiko da günlük olarak hacim botudur, rutin bir bottur, görevi 50 tane wra
 1. **Update the package lists:**
 
     ```sh
-    screen -S Taiko
+    sudo timedatectl set-timezone UTC
+     ```
+     ```sh
+    sudo nano /etc/default/locale
+    ```
+     Çıkan ekrana LC_TIME="en_GB.UTF-8"  yazıp ctrl+O Enter sonrasında Ctrl+X
+   
+    ```sh
+    source /etc/default/locale
+    ```
+    ```sh
+    sudo reboot
     ```
     ```sh
     sudo apt-get update
     ```
 
-2. **Install git:**
+3. **Install git:**
 
     ```sh
     sudo apt-get install git
     ```
 
-3. **Clone the repository:**
+4. **Clone the repository:**
 
     ```sh
     git clone https://github.com/TastasMete/TaikoBot.git
     ```
 
-4. **Navigate to the project directory:**
+5. **Navigate to the project directory:**
 
     ```sh
     cd TaikoBot
     ```
 
-5. **Install Node.js (if not already installed):**
+6. **Install Node.js (if not already installed):**
 
     ```sh
     curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
@@ -43,13 +54,13 @@ Bu Taiko da günlük olarak hacim botudur, rutin bir bottur, görevi 50 tane wra
    sudo apt-get install -y nodejs
     ```
 
-6. **Install the project dependencies:**
+7. **Install the project dependencies:**
 
     ```sh
     npm install
     ```
 
-7. **Create a `.env` file in the project directory and add your address & private key:**
+8. **Create a `.env` file in the project directory and add your address & private key:**
 
     
     ```sh
