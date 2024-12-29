@@ -15,8 +15,11 @@ Bu Taiko da günlük olarak hacim botudur, rutin bir bottur, görevi 50 tane wra
      ```sh
     sudo nano /etc/default/locale
     ```
-     Çıkan ekrana LC_TIME="en_GB.UTF-8"  yazıp ctrl+O Enter sonrasında Ctrl+X
+     Çıkan ekrana aşağıda kodu yapıştırın  ctrl+O Enter sonrasında Ctrl+X
    
+    ```sh
+    LC_TIME="en_GB.UTF-8"
+    ```
     ```sh
     source /etc/default/locale
     ```
